@@ -323,7 +323,11 @@ String _XtGetUserName(
 	(void) strncpy (dest, ptr, len-1);
 	dest[len-1] = '\0';
     } else {
+#ifdef __ANDROID__
+	if ((pw = getpwuid(getuid())) != NULL) {
+#else
 	if ((pw = _XGetpwuid(getuid(),pwparams)) != NULL) {
+#endif
 	    (void) strncpy (dest, pw->pw_name, len-1);
 	    dest[len-1] = '\0';
 	} else
@@ -371,9 +375,17 @@ static String GetRootDirName(
 	dest[len-1] = '\0';
     } else {
 	if ((ptr = getenv("USER")))
+#ifdef __ANDROID__
+	    pw = getpwnam(ptr);
+#else
 	    pw = _XGetpwnam(ptr,pwparams);
+#endif
 	else
+#ifdef __ANDROID__
+ 	    pw = getpwuid(getuid());
+#else
  	    pw = _XGetpwuid(getuid(),pwparams);
+#endif
 	if (pw != NULL) {
 	    (void) strncpy (dest, pw->pw_dir, len-1);
 	    dest[len-1] = '\0';
